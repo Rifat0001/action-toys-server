@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 
@@ -31,6 +31,20 @@ async function run() {
         // for insert data in mongodb database 
         const toyCollection = client.db('actionToy').collection('toys');
 
+        // for update data and find any specific coffee by id 
+        app.get('/toy/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await toyCollection.findOne(query);
+            res.send(result);
+        })
+
+        // to show mongodb data in localhost5000 server 
+        app.get('/toy', async (req, res) => {
+            const cursor = toyCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
 
         // to send add toys in server 
         app.post('/toy', async (req, res) => {
@@ -40,6 +54,9 @@ async function run() {
             const result = await toyCollection.insertOne(newToy);
             res.send(result);
         })
+
+
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
