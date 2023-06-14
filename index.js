@@ -34,27 +34,25 @@ async function run() {
         // for  find any specific toy by id 
         app.get('/toy/:id', async (req, res) => {
             const id = req.params.id;
+            console.log(id)
             const query = { _id: new ObjectId(id) };
             const result = await toyCollection.findOne(query);
             res.send(result);
         })
 
-        // get toy by filtering
-
-        app.get("/categoryToys/:text", async (req, res) => {
+        // get toy by category list
+        app.get('/allToy/:text', async (req, res) => {
             console.log(req.params.text);
             if (
-                req.params.text == "racing" ||
-                req.params.text == "regular" ||
-                req.params.text == "trucks"
+                req.params.text == "Marvel" ||
+                req.params.text == "Transformers" ||
+                req.params.text == "StarWar"
             ) {
-                const cursor = addToyCollection.find({ category: req.params.text });
-                const result = await cursor.toArray();
+                const result = await toyCollection.find({ category: req.params.text }).toArray();
                 return res.send(result);
             }
-            const cursor = addToyCollection.find();
-            const result = await cursor.toArray();
-            res.send(result);
+            const result = await toyCollection.find({}).toArray();
+            res.send(result)
         });
 
 
