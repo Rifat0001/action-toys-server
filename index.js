@@ -39,6 +39,26 @@ async function run() {
             res.send(result);
         })
 
+        // get toy by filtering
+
+        app.get("/categoryToys/:text", async (req, res) => {
+            console.log(req.params.text);
+            if (
+                req.params.text == "racing" ||
+                req.params.text == "regular" ||
+                req.params.text == "trucks"
+            ) {
+                const cursor = addToyCollection.find({ category: req.params.text });
+                const result = await cursor.toArray();
+                return res.send(result);
+            }
+            const cursor = addToyCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
+
+
         // to show mongodb data in localhost5000 server 
         app.get('/toy', async (req, res) => {
             const cursor = toyCollection.find();
