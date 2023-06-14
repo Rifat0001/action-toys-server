@@ -31,7 +31,7 @@ async function run() {
         // for insert data in mongodb database 
         const toyCollection = client.db('actionToy').collection('toys');
 
-        // for update data and find any specific coffee by id 
+        // for  find any specific toy by id 
         app.get('/toy/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
