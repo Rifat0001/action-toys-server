@@ -31,6 +31,22 @@ async function run() {
         // for insert data in mongodb database 
         const toyCollection = client.db('actionToy').collection('toys');
 
+        const indexKeys = { name: 1, category: 1 };
+        const indexOptions = { name: "nameCategory" };
+        const result = await toyCollection.createIndex(indexKeys, indexOptions);
+        app.get('/toySearchBy/:text', async (req, res) => {
+            const searchText = req.params.text;
+            const result = await toyCollection.find({
+                $or: [
+                    { name: { $regex: searchText, $options: 'i' } },
+                    { category: { $regex: searchText, $options: 'i' } }
+                ],
+
+            })
+                .toArray();
+            res.send(result)
+        })
+
         // for  find any specific toy by id 
         app.get('/toy/:id', async (req, res) => {
             const id = req.params.id;
@@ -72,18 +88,21 @@ async function run() {
             toyUpdate.price = parseFloat(toyUpdate.price);
             const updateDoc = {
                 $set: {
-                    description: toyUpdate.description,
+                    details: toyUpdate.description,
                     price: toyUpdate.price,
                     quantity: toyUpdate.quantity,
-                    toy_name: toyUpdate.toy_name,
-                    image: toyUpdate.image,
+                    name: toyUpdate.toy_name,
+                    url: toyUpdate.image,
                     category: toyUpdate.category,
+                    ratings: toyUpdate.ratings,
                 },
             };
             console.log(toyUpdate);
             const result = await toyCollection.updateOne(filter, updateDoc);
             res.send(result);
         });
+
+
 
 
         // delete
