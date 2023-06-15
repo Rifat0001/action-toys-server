@@ -42,7 +42,6 @@ async function run() {
 
         // get toy by category list
         app.get('/allToy/:text', async (req, res) => {
-            console.log(req.params.text);
             if (
                 req.params.text == "Marvel" ||
                 req.params.text == "Transformers" ||
@@ -57,9 +56,48 @@ async function run() {
 
 
 
+        // find data for my toys page with user email 
+        app.get('/myToys/:email', async (req, res) => {
+            console.log(req.params.email);
+            const result = await toyCollection.find({ email: req.params.email }).toArray();
+            console.log(result)
+            res.send(result);
+        })
+
+        // for update any data
+        app.put("/myToys/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const toyUpdate = req.body;
+            toyUpdate.price = parseFloat(toyUpdate.price);
+            const updateDoc = {
+                $set: {
+                    description: toyUpdate.description,
+                    price: toyUpdate.price,
+                    quantity: toyUpdate.quantity,
+                    toy_name: toyUpdate.toy_name,
+                    image: toyUpdate.image,
+                    category: toyUpdate.category,
+                },
+            };
+            console.log(toyUpdate);
+            const result = await toyCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        });
+
+
+        // delete
+        app.delete("/myToys/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await toyCollection.deleteOne(query);
+            res.send(result);
+        });
+
         // to show mongodb data in localhost5000 server 
         app.get('/toy', async (req, res) => {
             const cursor = toyCollection.find();
+
             const result = await cursor.toArray();
             res.send(result);
         })
@@ -68,6 +106,7 @@ async function run() {
         app.post('/toy', async (req, res) => {
             const newToy = req.body;
             console.log(newToy)
+
             // for send in mongodb / its next step to insert data 
             const result = await toyCollection.insertOne(newToy);
             res.send(result);
