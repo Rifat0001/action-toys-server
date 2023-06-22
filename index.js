@@ -31,22 +31,6 @@ async function run() {
         // for insert data in mongodb database 
         const toyCollection = client.db('actionToy').collection('toys');
 
-        const indexKeys = { name: 1, category: 1 };
-        const indexOptions = { name: "nameCategory" };
-        const result = await toyCollection.createIndex(indexKeys, indexOptions);
-        app.get('/toySearchBy/:text', async (req, res) => {
-            const searchText = req.params.text;
-            const result = await toyCollection.find({
-                $or: [
-                    { name: { $regex: searchText, $options: 'i' } },
-                    { category: { $regex: searchText, $options: 'i' } }
-                ],
-
-            })
-                .toArray();
-            res.send(result)
-        })
-
         // for  find any specific toy by id 
         app.get('/toy/:id', async (req, res) => {
             const id = req.params.id;
@@ -115,8 +99,19 @@ async function run() {
 
         // to show mongodb data in localhost5000 server 
         app.get('/toy', async (req, res) => {
-            const cursor = toyCollection.find();
-
+            // for sort data in ass and des
+            const sort = req.query.sort;
+            const search = req.query.search;
+            console.log(search)
+            const query = { name: { $regex: search, $options: 'i' } };
+            // const query = {}
+            console.log(query)
+            const options = {
+                sort: {
+                    "price": sort === 'asc' ? 1 : -1
+                }
+            }
+            const cursor = toyCollection.find(query, options);
             const result = await cursor.toArray();
             res.send(result);
         })
@@ -124,6 +119,7 @@ async function run() {
         // to send add toys in server 
         app.post('/toy', async (req, res) => {
             const newToy = req.body;
+            newToy.price = parseFloat(newToy.price);
             console.log(newToy)
 
             // for send in mongodb / its next step to insert data 
